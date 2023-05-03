@@ -1,0 +1,1 @@
+# wp-plugin-change-product-height-width
