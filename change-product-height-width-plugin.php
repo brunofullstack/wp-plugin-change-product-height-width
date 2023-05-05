@@ -13,24 +13,95 @@ function wp_g_h_w_plugin_custom_field()
 {
     woocommerce_wp_text_input(
         array(
-            'id' => 'wp_g_h_w_plugin_custom_field',
+            'id' => 'wp_g_h_w_plugin_custom_field_height',
+            'name' => 'wp_g_h_w_plugin_custom_field_height',
             'label' => __('Altura Inicial (cm)', 'meu-plugin'),
             'placeholder' => '',
             'desc_tip' => 'true',
-            'description' => __('Estas medidas irão definir a proporção', 'meu-plugin'),
+            'description' => __('Estas medidas irão definir a proporção.', 'meu-plugin'),
         )
     );
     woocommerce_wp_text_input(
         array(
-            'id' => 'wp_g_h_w_plugin_custom_field',
+            'id' => 'wp_g_h_w_plugin_custom_field_width',
+            'name' => 'wp_g_h_w_plugin_custom_field_width',
             'label' => __('Largura Inicial (cm)', 'meu-plugin'),
             'placeholder' => '',
             'desc_tip' => 'true',
-            'description' => __('Estas medidas irão definir a proporção', 'meu-plugin'),
+            'description' => __('Estas medidas irão definir a proporção.', 'meu-plugin'),
         )
     );
-}
 
+    ?>
+    <script>
+        document.getElementById("wp_g_h_w_plugin_custom_field_width").addEventListener("keyup", calcularArea)
+        function calcularArea() {
+            // Obter os valores das dimensões em centímetros
+            let cmAltura = document.getElementById("wp_g_h_w_plugin_custom_field_height").value;
+            let cmLargura = document.getElementById("wp_g_h_w_plugin_custom_field_width").value;
+
+            // Converter as dimensões de centímetros para metros
+            let metrosAltura = cmAltura / 100;
+            let metrosLargura = cmLargura / 100;
+
+            // Calcular a área em metros quadrados
+            let areaMetrosQuadrados = metrosAltura * metrosLargura;
+
+            // Exibir o resultado na página
+            // document.getElementById("resultado").innerHTML = "A área é de " + areaMetrosQuadrados + " metros quadrados.";
+
+            // Exibir o resultado na página
+            document.getElementById("_regular_price").value = areaMetrosQuadrados;
+
+
+            //Vefica o range em m² para definir o preço
+            //((pegas os preços antes no banco))
+            <?php
+            global $wpdb;
+            // Nome da tabela
+            $nome_tabela = $wpdb->prefix . 'wp_global_height_width_plugin';
+
+            // Consulta SQL para obter o primeiro registro
+            $sql = "SELECT * FROM wp_global_height_width_plugin LIMIT 1";
+
+            // Obter o primeiro registro da tabela
+            $registro = $wpdb->get_row($sql);
+            // $json_configured_values = json_encode($registro);
+            // echo $json_configured_values;
+            ?>
+            switch (areaMetrosQuadrados > 0) {
+                case (areaMetrosQuadrados <= 0.5):
+                    document.getElementById("_regular_price").value = <?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados
+                    break;
+                case (areaMetrosQuadrados >= 0.6 && areaMetrosQuadrados <= 1):
+                    document.getElementById("_regular_price").value = <?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados
+                    break;
+                case (areaMetrosQuadrados >= 1.1 && areaMetrosQuadrados <= 3):
+                    document.getElementById("_regular_price").value = <?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados
+                    break;
+                case (areaMetrosQuadrados >= 3.1 && areaMetrosQuadrados <= 5):
+                    document.getElementById("_regular_price").value = <?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados
+                    break;
+                default:
+                    console.log("O valor é maior ou igual a 15.");
+                    break;
+            }
+
+        }
+    </script>
+    <?php
+}
+// Recupera o valor do campo no formulário de edição do produto
+add_action('woocommerce_process_product_meta', 'salvar_novo_campo');
+
+function salvar_novo_campo($post_id)
+{
+    $altura = isset($_POST['wp_g_h_w_plugin_custom_field_height']) ? sanitize_text_field($_POST['wp_g_h_w_plugin_custom_field_height']) : '';
+    $largura = isset($_POST['wp_g_h_w_plugin_custom_field_width']) ? sanitize_text_field($_POST['wp_g_h_w_plugin_custom_field_width']) : '';
+
+    update_post_meta($post_id, 'wp_g_h_w_plugin_custom_field_height', $altura);
+    update_post_meta($post_id, 'wp_g_h_w_plugin_custom_field_width', $largura);
+}
 // Salva o valor do campo personalizado
 add_action('woocommerce_process_product_meta', 'wp_g_h_w_plugin_custom_field_save');
 function wp_g_h_w_plugin_custom_field_save($post_id)
@@ -312,6 +383,154 @@ if ($table_exists !== 1) {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql);
 }
+
+/* CAMPO PERSONALIZADO NA PÁGINA DE PRODUTO */
+// Adicionar campos personalizados na página de produto
+add_action('woocommerce_before_add_to_cart_button', 'meus_campos_personalizados', 10);
+
+function meus_campos_personalizados()
+{
+    echo '<div class="meus-campos">';
+    echo '<p>Se preferir personalize a altura e largura que preferir digitando abaixo:</p>';
+    woocommerce_form_field('altura', array(
+        'id' => 'checkout_altura',
+        'type' => 'text',
+        'class' => array('meu-campo1'),
+        'label' => __('Altura'),
+        'required' => true,
+        'placeholder' => __('Digite um valor para altura'),
+    ), '');
+    woocommerce_form_field('largura', array(
+        'id' => 'checkout_largura',
+        'type' => 'text',
+        'class' => array('meu-campo2'),
+        'label' => __('Largura'),
+        'required' => true,
+        'placeholder' => __('Digite um valor para altura'),
+    ), '');
+    echo '</div>';
+
+    ?>
+    <script type="text/javascript">
+        document.getElementById("checkout_largura").addEventListener("keyup", calcularAreaCheckout)
+        function calcularAreaCheckout() {
+            // Obter os valores das dimensões em centímetros
+            let cmAltura = document.getElementById("checkout_altura").value;
+            let cmLargura = document.getElementById("checkout_largura").value;
+
+            // Converter as dimensões de centímetros para metros
+            let metrosAltura = cmAltura / 100;
+            let metrosLargura = cmLargura / 100;
+
+            // Calcular a área em metros quadrados
+            let areaMetrosQuadrados = metrosAltura * metrosLargura;
+
+            // Exibir o resultado na página
+            // document.getElementById("resultado").innerHTML = "A área é de " + areaMetrosQuadrados + " metros quadrados.";
+
+            // Exibir o resultado na página
+            // document.getElementByClassName("woocommerce-Price-amount amount").value = areaMetrosQuadrados;
+            // selecionar o elemento HTML que deseja limpar e atualizar
+            const newPrice = document.getElementsByClassName("woocommerce-Price-amount amount");
+
+            // limpar o conteúdo do elemento HTML
+            newPrice[8].innerHTML = 'R$ ' + areaMetrosQuadrados.toFixed(2);
+
+                        //Vefica o range em m² para definir o preço
+            //((pegas os preços antes no banco))
+            <?php
+            global $wpdb;
+            // Nome da tabela
+            $nome_tabela = $wpdb->prefix . 'wp_global_height_width_plugin';
+
+            // Consulta SQL para obter o primeiro registro
+            $sql = "SELECT * FROM wp_global_height_width_plugin LIMIT 1";
+
+            // Obter o primeiro registro da tabela
+            $registro = $wpdb->get_row($sql);
+            // $json_configured_values = json_encode($registro);
+            // echo $json_configured_values;
+            ?>
+            // switch p/ criar uma nova tag HTML
+            switch (areaMetrosQuadrados > 0) {
+                case (areaMetrosQuadrados <= 0.5):
+                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
+                    break;
+                case (areaMetrosQuadrados >= 0.6 && areaMetrosQuadrados <= 1):
+                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
+                    break;
+                case (areaMetrosQuadrados >= 1.1 && areaMetrosQuadrados <= 3):
+                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
+                    break;
+                case (areaMetrosQuadrados >= 3.1 && areaMetrosQuadrados <= 5):
+                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
+                    break;
+                default:
+                    console.log("O valor é maior ou igual a 15.");
+                    break;
+            }
+
+            // const novaTag = document.createElement('p');
+            // <bdi><span class="woocommerce-Price-currencySymbol">R$</span>221,31</bdi>
+            // novaTag.textContent = 'Novo conteúdo';
+
+            // // inserir a nova tag HTML dentro do elemento
+            // newPrice.appendChild(novaTag);
+
+
+        }
+    </script>
+    <?php
+
+}
+
+
+// Atualizar o preço do produto com base nos campos personalizados
+add_filter('woocommerce_add_cart_item_data', 'atualizar_preco_do_produto', 10, 2);
+
+function atualizar_preco_do_produto($cart_item_data, $product_id)
+{
+    // Obter o valor dos campos personalizados
+    $campo1 = isset($_POST['campo1']) ? $_POST['campo1'] : '';
+    $campo2 = isset($_POST['campo2']) ? $_POST['campo2'] : '';
+
+    // Calcular o novo preço do produto com base nos campos personalizados
+    $novo_preco = $preco_do_produto + $campo1 + $campo2;
+
+    // Armazenar o novo preço do produto no carrinho
+    $cart_item_data['new_price'] = $novo_preco;
+    return $cart_item_data;
+}
+
+// Exibir o novo preço do produto no carrinho e na página de checkout
+add_filter('woocommerce_cart_item_price', 'exibir_novo_preco_do_produto', 10, 3);
+
+function exibir_novo_preco_do_produto($preco, $cart_item, $cart_item_key)
+{
+    if (isset($cart_item['new_price'])) {
+        $preco = wc_price($cart_item['new_price']);
+    }
+    return $preco;
+}
+
+// Atualizar o preço total do pedido com base no novo preço do produto
+add_action('woocommerce_before_calculate_totals', 'atualizar_preco_total_do_pedido');
+
+function atualizar_preco_total_do_pedido($cart)
+{
+    if (is_admin() && !defined('DOING_AJAX')) {
+        return;
+    }
+
+    // Loop pelos itens do carrinho
+    foreach ($cart->get_cart() as $cart_item_key => $cart_item) {
+        if (isset($cart_item['new_price'])) {
+            $cart_item['data']->set_price($cart_item['new_price']);
+        }
+    }
+}
+/* CAMPO PERSONALIZADO NA PÁGINA DE PRODUTO */
+
 
 // add_action( 'template_redirect', 'my_callback' );
 function my_callback()
