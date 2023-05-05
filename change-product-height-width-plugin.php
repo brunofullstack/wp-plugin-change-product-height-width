@@ -17,7 +17,7 @@ function wp_g_h_w_plugin_custom_field()
             'label' => __('Altura Inicial (cm)', 'meu-plugin'),
             'placeholder' => '',
             'desc_tip' => 'true',
-            'description' => __('Digite aqui a descrição do campo personalizado.', 'meu-plugin'),
+            'description' => __('Estas medidas irão definir a proporção', 'meu-plugin'),
         )
     );
     woocommerce_wp_text_input(
@@ -26,7 +26,7 @@ function wp_g_h_w_plugin_custom_field()
             'label' => __('Largura Inicial (cm)', 'meu-plugin'),
             'placeholder' => '',
             'desc_tip' => 'true',
-            'description' => __('Digite aqui a descrição do campo personalizado.', 'meu-plugin'),
+            'description' => __('Estas medidas irão definir a proporção', 'meu-plugin'),
         )
     );
 }
@@ -52,16 +52,132 @@ function wp_g_h_w_plugin_menu()
         // título do menu
         'manage_options',
         // permissão de acesso
-        'meu-plugin-settings',
+        'wp-change-hw-plugin',
         // slug da página
         'wp_g_h_w_plugin_settings_page' // função que renderiza a página
     );
 }
 
+function get_setted_values()
+{
+    global $wpdb;
+
+    // Nome da tabela
+    $nome_tabela = $wpdb->prefix . 'wp_global_height_width_plugin';
+
+    // Consulta SQL para obter o primeiro registro
+    $sql = "SELECT * FROM wp_global_height_width_plugin LIMIT 1";
+
+    // Obter o primeiro registro da tabela
+    $registro = $wpdb->get_row($sql);
+    // var_dump($resultados[0]);
+
+    // Verificar se há resultados
+    if ($registro) {
+        $campo1 = $registro->largura_maxima;
+        $campo2 = $registro->altura_maxima;
+        $campo3 = $registro->preco_0_05;
+        $campo4 = $registro->preco_05_1;
+        $campo5 = $registro->preco_1_3;
+        $campo6 = $registro->preco_3_5;
+        // Montar um formulário com os campos preenchidos pelos valores do registro
+        echo '<h2>Tamanho</h2>';
+        echo '<table class="form-table"><tbody><tr><th scope="row"><label for="wp_g_h_w_plugin_altura">Altura máxima (cm):</label></th>';
+        echo '<td>';
+        echo '<input name="wp_g_h_w_plugin_altura" type="number" step="0.01" id="wp_g_h_w_plugin_altura" value="' . $campo1 . '" class="regular-text">';
+        echo '</td>';
+        echo '</tr>';
+        echo '<tr>';
+        echo '<th scope="row"><label for="wp_g_h_w_plugin_largura">Largura máxima (cm):</label></th>';
+        echo '<td>';
+        echo '<input name="wp_g_h_w_plugin_largura" type="number" step="0.01" id="wp_g_h_w_plugin_largura" value="' . $campo2 . '" class="regular-text">';
+        echo '</td>';
+        echo '</tr>';
+        echo '</tbody>';
+        echo '</table>';
+
+
+        echo '<h2>Preços</h2>';
+        echo '<table class="form-table"><tbody><tr><th scope="row"><label for="wp_g_h_w_plugin_preco_base_0_05">0 a 0,5M² em R$:</label></th>';
+        echo '<td>';
+        echo '<input name="wp_g_h_w_plugin_preco_base_0_05" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_0_05" value="' . $campo3 . '" class="regular-text">';
+        echo '</td>';
+        echo '</tr>';
+        echo '<tr>';
+        echo '<th scope="row"><label for="wp_g_h_w_plugin_preco_base_05_1">0,5 a 1M² em R$:</label></th>';
+        echo '<td>';
+        echo '<input name="wp_g_h_w_plugin_preco_base_05_1" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_05_1" value="' . $campo4 . '" class="regular-text">';
+        echo '</td>';
+        echo '</tr>';
+        echo '<tr>';
+        echo '<th scope="row"><label for="wp_g_h_w_plugin_preco_base_1_3">1 a 3M² em R$:</label></th>';
+        echo '<td>';
+        echo '<input name="wp_g_h_w_plugin_preco_base_1_3" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_1_3" value="' . $campo5 . '" class="regular-text">';
+        echo '</td>';
+        echo '</tr>';
+        echo '<tr>';
+        echo '<th scope="row"><label for="wp_g_h_w_plugin_preco_base_3_5">3 a 5M² em R$:</label></th>';
+        echo '<td>';
+        echo '<input name="wp_g_h_w_plugin_preco_base_3_5" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_3_5" value="' . $campo6 . '" class="regular-text">';
+        echo '</td>';
+        echo '</tr>';
+        echo '</tbody>';
+        echo '</table>';
+
+    } else {
+        ?>
+
+        <h2>Tamanho</h2>
+        <table class="form-table">
+            <tbody>
+                <tr>
+                    <th scope="row"><label for="wp_g_h_w_plugin_altura">Altura máxima (cm):</label></th>
+                    <td><input name="wp_g_h_w_plugin_altura" type="number" step="0.01" id="wp_g_h_w_plugin_altura"
+                            value="<?php echo esc_attr($altura); ?>" class="regular-text"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="wp_g_h_w_plugin_largura">Largura máxima (cm):</label></th>
+                    <td><input name="wp_g_h_w_plugin_largura" type="number" step="0.01" id="wp_g_h_w_plugin_largura"
+                            value="<?php echo esc_attr($largura); ?>" class="regular-text"></td>
+                </tr>
+            </tbody>
+
+        </table>
+        <h2>
+            Preços
+        </h2>
+        <table class="form-table">
+            <tbody>
+                <tr>
+                    <th scope="row"><label for="wp_g_h_w_plugin_preco_base_0_05">0 a 0,5M² em R$:</label></th>
+                    <td><input name="wp_g_h_w_plugin_preco_base_0_05" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base"
+                            value="<?php echo esc_attr($preco_base_0_05); ?>" class="regular-text"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="wp_g_h_w_plugin_preco_base_05_1">0,5 a 1M² em R$:</label></th>
+                    <td><input name="wp_g_h_w_plugin_preco_base_05_1" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base"
+                            value="<?php echo esc_attr($preco_base_05_1); ?>" class="regular-text"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="wp_g_h_w_plugin_preco_base_1_3">1 a 3M² em R$:</label></th>
+                    <td><input name="wp_g_h_w_plugin_preco_base_1_3" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base"
+                            value="<?php echo esc_attr($preco_base_1_3); ?>" class="regular-text"></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="wp_g_h_w_plugin_preco_base_3_5">3 a 5M² em R$:</label></th>
+                    <td><input name="wp_g_h_w_plugin_preco_base_3_5" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base"
+                            value="<?php echo esc_attr($preco_base_3_5); ?>" class="regular-text"></td>
+                </tr>
+            </tbody>
+        </table>
+        <?php
+    }
+}
 
 // Cria o conteúdo da página de configuração
 function wp_g_h_w_plugin_settings_page()
 {
+
     if (!current_user_can('manage_options')) {
         return;
     }
@@ -94,65 +210,29 @@ function wp_g_h_w_plugin_settings_page()
         <h1>
             <?php echo esc_html(get_admin_page_title()); ?>
         </h1>
-        <label for="ping_sites">
+        <label>
             Cadastro global que se aplica a todos os produtos. Aqui é possivel definir um limite máximo e mínimo da medida e
             também os valores de acordo com o tamanho.
         </label>
-        <form method="post" action="salvar_informacoes">
-            <input type="hidden" name="action" value="salvar_informacoes">
 
-            <h2>
-                Tamanho
-            </h2>
-            <table class="form-table">
-                <tbody>
-                    <tr>
-                        <th scope="row"><label for="wp_g_h_w_plugin_altura">Altura máxima (cm):</label></th>
-                        <td><input name="wp_g_h_w_plugin_altura" type="number" step="0.01" id="wp_g_h_w_plugin_altura"
-                                value="<?php echo esc_attr($altura); ?>" class="regular-text"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="wp_g_h_w_plugin_largura">Largura máxima (cm):</label></th>
-                        <td><input name="wp_g_h_w_plugin_largura" type="number" step="0.01" id="wp_g_h_w_plugin_largura"
-                                value="<?php echo esc_attr($largura); ?>" class="regular-text"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <h2>
-                Preços
-            </h2>
-            <table class="form-table">
-                <tbody>
-                    <tr>
-                        <th scope="row"><label for="wp_g_h_w_plugin_preco_base_0_05">0 a 0,5M² em R$:</label></th>
-                        <td><input name="wp_g_h_w_plugin_preco_base_0_05" type="number" step="0.01"
-                                id="wp_g_h_w_plugin_preco_base" value="<?php echo esc_attr($preco_base_0_05); ?>"
-                                class="regular-text"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="wp_g_h_w_plugin_preco_base_05_1">0,5 a 1M² em R$:</label></th>
-                        <td><input name="wp_g_h_w_plugin_preco_base_05_1" type="number" step="0.01"
-                                id="wp_g_h_w_plugin_preco_base" value="<?php echo esc_attr($preco_base_05_1); ?>"
-                                class="regular-text"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="wp_g_h_w_plugin_preco_base_1_3">1 a 3M² em R$:</label></th>
-                        <td><input name="wp_g_h_w_plugin_preco_base_1_3" type="number" step="0.01"
-                                id="wp_g_h_w_plugin_preco_base" value="<?php echo esc_attr($preco_base_1_3); ?>"
-                                class="regular-text"></td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><label for="wp_g_h_w_plugin_preco_base_3_5">3 a 5M² em R$:</label></th>
-                        <td><input name="wp_g_h_w_plugin_preco_base_3_5" type="number" step="0.01"
-                                id="wp_g_h_w_plugin_preco_base" value="<?php echo esc_attr($preco_base_3_5); ?>"
-                                class="regular-text"></td>
-                    </tr>
-                </tbody>
-            </table>
+        <form method="post">
+            <input type="hidden" name="action" value="salvar_informacoes">
+            <input type="hidden" name="my_form" value="1">
+
+
+            <?php get_setted_values(); ?>
+
+
             <?php submit_button(); ?>
         </form>
+
     </div>
     <?php
+}
+// check if form has been submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['my_form'])) {
+    // call your function
+    salvar_informacoes();
 }
 function salvar_informacoes()
 {
@@ -179,7 +259,7 @@ function salvar_informacoes()
         $wpdb->insert(
             'wp_global_height_width_plugin',
             array(
-                'id' => $altura,
+                'id' => 1,
                 'altura_maxima' => $altura,
                 'largura_maxima' => $largura,
                 'preco_0_05' => $preco_base_0_05,
@@ -192,7 +272,12 @@ function salvar_informacoes()
 
         $wpdb->close();
 
-        echo "Obrigado por se cadastrar";
+        echo 'Formulário salvo com sucesso!';
+        // Add the success message to the redirected page
+        add_action('wp_head', function () {
+            echo '<div class="alert alert-success">Formulário salvo com sucesso!</div>';
+        });
+
         exit;
     } catch (Exception $ex) {
         // jump to this part
@@ -204,8 +289,6 @@ function salvar_informacoes()
     exit;
 }
 
-add_action('admin_post_salvar_informacoes', 'salvar_informacoes');
-add_action('admin_post_nopriv_salvar_informacoes', 'salvar_informacoes');
 // END OF FORM
 
 
