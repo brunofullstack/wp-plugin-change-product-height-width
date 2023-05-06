@@ -394,6 +394,7 @@ function meus_campos_personalizados()
     echo '<p>Se preferir personalize a altura e largura que preferir digitando abaixo:</p>';
     woocommerce_form_field('altura', array(
         'id' => 'checkout_altura',
+        'name' => 'checkout_altura',
         'type' => 'text',
         'class' => array('meu-campo1'),
         'label' => __('Altura'),
@@ -402,6 +403,7 @@ function meus_campos_personalizados()
     ), '');
     woocommerce_form_field('largura', array(
         'id' => 'checkout_largura',
+        'name' => 'checkout_largura',
         'type' => 'text',
         'class' => array('meu-campo2'),
         'label' => __('Largura'),
@@ -409,6 +411,8 @@ function meus_campos_personalizados()
         'placeholder' => __('Digite um valor para altura'),
     ), '');
     echo '</div>';
+    echo '<input id="price_updated" name="price_updated" type="hidden" />';
+    echo '<h1 id="new-amount"></h1>';
 
     ?>
     <script type="text/javascript">
@@ -426,15 +430,12 @@ function meus_campos_personalizados()
             let areaMetrosQuadrados = metrosAltura * metrosLargura;
 
             // Exibir o resultado na página
-            // document.getElementById("resultado").innerHTML = "A área é de " + areaMetrosQuadrados + " metros quadrados.";
-
-            // Exibir o resultado na página
-            // document.getElementByClassName("woocommerce-Price-amount amount").value = areaMetrosQuadrados;
             // selecionar o elemento HTML que deseja limpar e atualizar
-            const newPrice = document.getElementsByClassName("woocommerce-Price-amount amount");
+            const newPrice = document.getElementById("new-amount");
+            let finalAmount = document.getElementById("price_updated");
 
             // limpar o conteúdo do elemento HTML
-            newPrice[8].innerHTML = 'R$ ' + areaMetrosQuadrados.toFixed(2);
+            newPrice.innerHTML = '';
 
                         //Vefica o range em m² para definir o preço
             //((pegas os preços antes no banco))
@@ -452,31 +453,32 @@ function meus_campos_personalizados()
             // echo $json_configured_values;
             ?>
             // switch p/ criar uma nova tag HTML
+            let new_amount = 0;
             switch (areaMetrosQuadrados > 0) {
                 case (areaMetrosQuadrados <= 0.5):
-                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
+                    new_amount = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    finalAmount.value = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 0.6 && areaMetrosQuadrados <= 1):
-                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
+                    new_amount = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    finalAmount.value = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 1.1 && areaMetrosQuadrados <= 3):
-                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
+                    new_amount = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    finalAmount.value = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 3.1 && areaMetrosQuadrados <= 5):
-                    newPrice[8].innerHTML = 'R$ ' + (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
+                    new_amount = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    finalAmount.value = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 default:
                     console.log("O valor é maior ou igual a 15.");
                     break;
             }
-
-            // const novaTag = document.createElement('p');
-            // <bdi><span class="woocommerce-Price-currencySymbol">R$</span>221,31</bdi>
-            // novaTag.textContent = 'Novo conteúdo';
-
-            // // inserir a nova tag HTML dentro do elemento
-            // newPrice.appendChild(novaTag);
-
 
         }
     </script>
@@ -491,11 +493,7 @@ add_filter('woocommerce_add_cart_item_data', 'atualizar_preco_do_produto', 10, 2
 function atualizar_preco_do_produto($cart_item_data, $product_id)
 {
     // Obter o valor dos campos personalizados
-    $campo1 = isset($_POST['campo1']) ? $_POST['campo1'] : '';
-    $campo2 = isset($_POST['campo2']) ? $_POST['campo2'] : '';
-
-    // Calcular o novo preço do produto com base nos campos personalizados
-    $novo_preco = $preco_do_produto + $campo1 + $campo2;
+    $novo_preco = isset($_POST['price_updated']) ? $_POST['price_updated'] : '';
 
     // Armazenar o novo preço do produto no carrinho
     $cart_item_data['new_price'] = $novo_preco;
