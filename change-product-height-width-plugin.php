@@ -384,37 +384,160 @@ add_action('woocommerce_before_add_to_cart_button', 'meus_campos_personalizados'
 
 function meus_campos_personalizados()
 {
-    echo '<div class="meus-campos">';
-    echo '<p>Se preferir personalize a altura e largura que preferir digitando abaixo:</p>';
+    // echo '<div class="meus-campos">';
+    // echo '<p>Se preferir personalize a altura e largura que preferir digitando abaixo:</p>';
+    // woocommerce_form_field('altura', array(
+    //     'id' => 'checkout_altura',
+    //     'name' => 'checkout_altura',
+    //     'type' => 'text',
+    //     'class' => array('meu-campo1'),
+    //     'label' => __('Altura'),
+    //     'required' => true,
+    //     'placeholder' => __('Digite um valor para altura'),
+    // ), '');
+    // woocommerce_form_field('largura', array(
+    //     'id' => 'checkout_largura',
+    //     'name' => 'checkout_largura',
+    //     'type' => 'text',
+    //     'class' => array('meu-campo2'),
+    //     'label' => __('Largura'),
+    //     'required' => true,
+    //     'placeholder' => __('Digite um valor para altura'),
+    // ), '');
+    // echo '</div>';
+    // echo '<input id="price_updated" name="price_updated" type="hidden" />';
+    // echo '<div id="new-amount"></div>';
+
+    echo '<div class="container">';
+    echo '<h1>Selecione a medida desejada:</h1>';
+    echo '<form>';
+    echo '<div class="form-group">';
+    echo '<label for="selectMedida">Selecione a medida:</label>';
+    echo '<select class="form-control" id="selectMedida" name="medida">';
+    echo '<option value="altura">Altura</option>';
+    echo '<option value="largura">Largura</option>';
+    echo '</select>';
+    echo '</div>';
+    echo '<div class="row" id="divMedida">';
+    echo '<label id="largura_label" class="col-md-5" for="inputMedida">Largura em cm:</label>';
+    echo '<label id="altura_label" class="col-md-5" for="inputMedida">Altura em cm:</label>';
+    echo '<div id="div_altura" class="col-md-7">';
     woocommerce_form_field('altura', array(
         'id' => 'checkout_altura',
         'name' => 'checkout_altura',
         'type' => 'text',
-        'class' => array('meu-campo1'),
-        'label' => __('Altura'),
+        'class' => array(''),
         'required' => true,
-        'placeholder' => __('Digite um valor para altura'),
+        'placeholder' => __('Insira a altura em centímetros'),
     ), '');
+    echo '</div>';
+    echo '<div id="div_largura" class="col-md-7">';
     woocommerce_form_field('largura', array(
         'id' => 'checkout_largura',
         'name' => 'checkout_largura',
         'type' => 'text',
-        'class' => array('meu-campo2'),
-        'label' => __('Largura'),
+        'class' => array(''),
         'required' => true,
-        'placeholder' => __('Digite um valor para altura'),
+        'placeholder' => __('Insira a largura em centímetros'),
     ), '');
     echo '</div>';
+    echo '</div>';
     echo '<input id="price_updated" name="price_updated" type="hidden" />';
+    echo '</form>';
+    echo '</div>';
     echo '<div id="new-amount"></div>';
 
     ?>
+    <!-- Importando os arquivos do Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <!-- Script para mostrar/esconder o input de acordo com a opção selecionada -->
+    <script>
+        $(document).ready(function () {
+            $("#altura_label").show();
+            $("#div_altura").show();
+            $("#largura_label").hide();
+            $("#div_largura").hide();
+            $("#divMedida").show();
+            function cleanInputs() {
+                document.getElementById("checkout_largura").value = "";
+                document.getElementById("checkout_altura").value = "";
+            }
+            $("#selectMedida").change(function () {
+                if ($("#selectMedida").val() == "altura") {
+                    cleanInputs();
+                    $("#divMedida").show();
+                    $("#div_altura").show();
+                    $("#largura_label").hide();
+                    $("#div_largura").hide();
+                    $("#altura_label").show();
+                    $("#inputMedida").attr("placeholder", "Insira a altura em centímetros");
+                } else if ($("#selectMedida").val() == "largura") {
+                    cleanInputs();
+                    $("#divMedida").show();
+                    $("#div_largura").show();
+                    $("#altura_label").hide();
+                    $("#div_altura").hide();
+                    $("#largura_label").show();
+                    $("#inputMedida").attr("placeholder", "Insira a largura em centímetros");
+                } else {
+                    $("#divMedida").hide();
+                }
+            });
+        });
+    </script>
     <script type="text/javascript">
-        document.getElementById("checkout_largura").addEventListener("keyup", calcularAreaCheckout)
+        document.getElementById("checkout_largura").addEventListener("keyup", calcularAreaCheckout);
+        document.getElementById("checkout_altura").addEventListener("keyup", calcularAreaCheckout);
         function calcularAreaCheckout() {
+            //Vefica o range em m² para definir o preço
+            //((pegas os preços antes no banco))
+            <?php
+            global $wpdb;
+            // Nome da tabela
+            $nome_tabela = $wpdb->prefix . 'wp_global_height_width_plugin';
+
+            // Consulta SQL para obter o primeiro registro
+            $sql = "SELECT * FROM wp_global_height_width_plugin LIMIT 1";
+
+            // Obter o primeiro registro da tabela
+            $registro = $wpdb->get_row($sql);
+            // $json_configured_values = json_encode($registro);
+            // echo $json_configured_values;
+            ?>
+            // Proporção = Largura / Altura
+            const proporcao = <?php echo $registro->largura_maxima; ?> / <?php echo $registro->altura_maxima; ?>;
+
+
             // Obter os valores das dimensões em centímetros
             let cmAltura = document.getElementById("checkout_altura").value;
             let cmLargura = document.getElementById("checkout_largura").value;
+
+            if (cmAltura > 0) {
+                cmLargura = cmAltura * proporcao;
+            } else {
+                cmAltura = cmLargura / proporcao;
+            }
+            // Obter os valores das dimensões em centímetros
+            var selectMedida = document.getElementById("selectMedida");
+            selectMedida.addEventListener("change", function () {
+                if (selectMedida.value == "altura") {
+                    cmLargura = cmAltura * proporcao;
+                    cmLargura.toFixed(2)
+                } else if (selectMedida.value == "largura") {
+                    cmAltura = cmLargura / proporcao;
+                    cmAltura.toFixed(2)
+                }
+            });
 
             // Converter as dimensões de centímetros para metros
             let metrosAltura = cmAltura / 100;
@@ -431,51 +554,39 @@ function meus_campos_personalizados()
             // limpar o conteúdo do elemento HTML
             newPrice.innerHTML = '';
 
-            //Vefica o range em m² para definir o preço
-            //((pegas os preços antes no banco))
-            <?php
-            global $wpdb;
-            // Nome da tabela
-            $nome_tabela = $wpdb->prefix . 'wp_global_height_width_plugin';
-
-            // Consulta SQL para obter o primeiro registro
-            $sql = "SELECT * FROM wp_global_height_width_plugin LIMIT 1";
-
-            // Obter o primeiro registro da tabela
-            $registro = $wpdb->get_row($sql);
-            // $json_configured_values = json_encode($registro);
-            // echo $json_configured_values;
-            ?>
             // switch p/ criar uma nova tag HTML
             let new_amount = 0;
             switch (areaMetrosQuadrados > 0) {
                 case (areaMetrosQuadrados <= 0.5):
                     new_amount = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2 class="new_amount"></h2>R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 0.6 && areaMetrosQuadrados <= 1):
                     new_amount = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2 class="new_amount">R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 1.1 && areaMetrosQuadrados <= 3):
                     new_amount = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2 class="new_amount">R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 3.1 && areaMetrosQuadrados <= 5):
                     new_amount = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2 class="new_amount">R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 default:
-                    console.log("O valor é maior ou igual a 15.");
+                    newPrice.innerHTML = "O valor é maior que a proporção máxima! Insira outro valor!";
                     break;
             }
 
         }
     </script>
+    <style>
+        .new_amount{ color: #f03764;}
+    </style>
     <?php
 
 }
