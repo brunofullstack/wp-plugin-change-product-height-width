@@ -155,13 +155,13 @@ function get_setted_values()
         echo '<h2>Tamanho</h2>';
         echo '<table class="form-table"><tbody><tr><th scope="row"><label for="wp_g_h_w_plugin_altura">Altura máxima (cm):</label></th>';
         echo '<td>';
-        echo '<input name="wp_g_h_w_plugin_altura" type="number" step="0.01" id="wp_g_h_w_plugin_altura" value="' . $campo1 . '" class="regular-text">';
+        echo '<input required name="wp_g_h_w_plugin_altura" type="number" step="0.01" id="wp_g_h_w_plugin_altura" value="' . $campo1 . '" class="regular-text">';
         echo '</td>';
         echo '</tr>';
         echo '<tr>';
         echo '<th scope="row"><label for="wp_g_h_w_plugin_largura">Largura máxima (cm):</label></th>';
         echo '<td>';
-        echo '<input name="wp_g_h_w_plugin_largura" type="number" step="0.01" id="wp_g_h_w_plugin_largura" value="' . $campo2 . '" class="regular-text">';
+        echo '<input required name="wp_g_h_w_plugin_largura" type="number" step="0.01" id="wp_g_h_w_plugin_largura" value="' . $campo2 . '" class="regular-text">';
         echo '</td>';
         echo '</tr>';
         echo '</tbody>';
@@ -171,29 +171,30 @@ function get_setted_values()
         echo '<h2>Preços</h2>';
         echo '<table class="form-table"><tbody><tr><th scope="row"><label for="wp_g_h_w_plugin_preco_base_0_05">0 a 0,5M² em R$:</label></th>';
         echo '<td>';
-        echo '<input name="wp_g_h_w_plugin_preco_base_0_05" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_0_05" value="' . $campo3 . '" class="regular-text">';
+        echo '<input required name="wp_g_h_w_plugin_preco_base_0_05" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_0_05" value="' . $campo3 . '" class="regular-text">';
         echo '</td>';
         echo '</tr>';
         echo '<tr>';
         echo '<th scope="row"><label for="wp_g_h_w_plugin_preco_base_05_1">0,5 a 1M² em R$:</label></th>';
         echo '<td>';
-        echo '<input name="wp_g_h_w_plugin_preco_base_05_1" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_05_1" value="' . $campo4 . '" class="regular-text">';
+        echo '<input required name="wp_g_h_w_plugin_preco_base_05_1" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_05_1" value="' . $campo4 . '" class="regular-text">';
         echo '</td>';
         echo '</tr>';
         echo '<tr>';
         echo '<th scope="row"><label for="wp_g_h_w_plugin_preco_base_1_3">1 a 3M² em R$:</label></th>';
         echo '<td>';
-        echo '<input name="wp_g_h_w_plugin_preco_base_1_3" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_1_3" value="' . $campo5 . '" class="regular-text">';
+        echo '<input required name="wp_g_h_w_plugin_preco_base_1_3" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_1_3" value="' . $campo5 . '" class="regular-text">';
         echo '</td>';
         echo '</tr>';
         echo '<tr>';
         echo '<th scope="row"><label for="wp_g_h_w_plugin_preco_base_3_5">3 a 5M² em R$:</label></th>';
         echo '<td>';
-        echo '<input name="wp_g_h_w_plugin_preco_base_3_5" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_3_5" value="' . $campo6 . '" class="regular-text">';
+        echo '<input required name="wp_g_h_w_plugin_preco_base_3_5" type="number" step="0.01" id="wp_g_h_w_plugin_preco_base_3_5" value="' . $campo6 . '" class="regular-text">';
         echo '</td>';
         echo '</tr>';
         echo '</tbody>';
         echo '</table>';
+        echo '<p>Todos os campos são obrigarórios<span style="color: red"> *</span></p>';
 
     } else {
         ?>
@@ -343,21 +344,14 @@ function salvar_informacoes()
 
         $wpdb->close();
 
-        echo 'Formulário salvo com sucesso!';
-        // Add the success message to the redirected page
-        add_action('wp_head', function () {
-            echo '<div class="alert alert-success">Formulário salvo com sucesso!</div>';
-        });
-
+        echo '<div class="alert alert-success">Configurações salvas com sucesso! <br /> <a href=""> << Voltar</a></div>';
         exit;
+
     } catch (Exception $ex) {
-        // jump to this part
-        // if an exception occurred
+        echo $ex;
+        exit;
     }
 
-
-    // echo "Obrigado por se cadastrar";
-    exit;
 }
 
 // END OF FORM
@@ -412,7 +406,7 @@ function meus_campos_personalizados()
     ), '');
     echo '</div>';
     echo '<input id="price_updated" name="price_updated" type="hidden" />';
-    echo '<h1 id="new-amount"></h1>';
+    echo '<div id="new-amount"></div>';
 
     ?>
     <script type="text/javascript">
@@ -437,7 +431,7 @@ function meus_campos_personalizados()
             // limpar o conteúdo do elemento HTML
             newPrice.innerHTML = '';
 
-                        //Vefica o range em m² para definir o preço
+            //Vefica o range em m² para definir o preço
             //((pegas os preços antes no banco))
             <?php
             global $wpdb;
@@ -457,22 +451,22 @@ function meus_campos_personalizados()
             switch (areaMetrosQuadrados > 0) {
                 case (areaMetrosQuadrados <= 0.5):
                     new_amount = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 0.6 && areaMetrosQuadrados <= 1):
                     new_amount = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 1.1 && areaMetrosQuadrados <= 3):
                     new_amount = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 case (areaMetrosQuadrados >= 3.1 && areaMetrosQuadrados <= 5):
                     new_amount = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
-                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: R$ ' + new_amount;
+                    newPrice.innerHTML = 'O novo valor para as medidas ' + cmAltura + 'cm X ' + cmLargura + 'cm' + ' será de: <h2>R$ ' + new_amount + '</h2>';
                     finalAmount.value = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 default:
