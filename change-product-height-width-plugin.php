@@ -32,11 +32,19 @@ function wp_g_h_w_plugin_custom_field()
             'description' => __('Estas medidas irão definir a proporção.', 'meu-plugin'),
         )
     );
+    echo '<h5 id="alert" style="margin-left: 12px"></h5>';
 
     ?>
     <script>
-        document.getElementById("wp_g_h_w_plugin_custom_field_width").addEventListener("keyup", calcularArea)
-        function calcularArea() {
+        document.getElementById("wp_g_h_w_plugin_custom_field_height").addEventListener("keyup", callback("altura"))
+        document.getElementById("wp_g_h_w_plugin_custom_field_width").addEventListener("keyup", callback("largura"))
+        // Definindo uma função anônima que recebe um parâmetro e retorna uma função de callback
+        function callback(parametro) {
+            return function (event) {
+                calcularArea(parametro);
+            }
+        };
+        function calcularArea(inputName) {
             // Obter os valores das dimensões em centímetros
             let cmAltura = document.getElementById("wp_g_h_w_plugin_custom_field_height").value;
             let cmLargura = document.getElementById("wp_g_h_w_plugin_custom_field_width").value;
@@ -50,10 +58,6 @@ function wp_g_h_w_plugin_custom_field()
 
             // Exibir o resultado na página
             // document.getElementById("resultado").innerHTML = "A área é de " + areaMetrosQuadrados + " metros quadrados.";
-
-            // Exibir o resultado na página
-            document.getElementById("_regular_price").value = areaMetrosQuadrados;
-
 
             //Vefica o range em m² para definir o preço
             //((pegas os preços antes no banco))
@@ -70,24 +74,36 @@ function wp_g_h_w_plugin_custom_field()
             // $json_configured_values = json_encode($registro);
             // echo $json_configured_values;
             ?>
+            let new_regular_price = document.getElementById("_regular_price");
             switch (areaMetrosQuadrados > 0) {
                 case (areaMetrosQuadrados <= 0.5):
-                    document.getElementById("_regular_price").value = <?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados
+                    new_regular_price.value = (<?php echo $registro->preco_0_05; ?> * areaMetrosQuadrados).toFixed(2)
                     break;
                 case (areaMetrosQuadrados >= 0.6 && areaMetrosQuadrados <= 1):
-                    document.getElementById("_regular_price").value = <?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados
+                    new_regular_price.value = (<?php echo $registro->preco_05_1; ?> * areaMetrosQuadrados).toFixed(2)
                     break;
                 case (areaMetrosQuadrados >= 1.1 && areaMetrosQuadrados <= 3):
-                    document.getElementById("_regular_price").value = <?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados
+                    new_regular_price.value = (<?php echo $registro->preco_1_3; ?> * areaMetrosQuadrados).toFixed(2)
                     break;
                 case (areaMetrosQuadrados >= 3.1 && areaMetrosQuadrados <= 5):
-                    document.getElementById("_regular_price").value = <?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados
+                    new_regular_price.value = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2)
                     break;
                 default:
-                    console.log("O valor é maior ou igual a 15.");
                     break;
             }
 
+            let alert = document.getElementById("alert");
+            
+            if (cmAltura > <?php echo $registro->altura_maxima; ?> && inputName == 'altura') {
+                alert.innerHTML = '';
+                alert.innerHTML = '<span style="color:red; font-weight: bold;">ATENÇÃO! O máximo valor permitido para altura é de: <?php echo $registro->altura_maxima; ?> cm</span>'
+                document.getElementById("wp_g_h_w_plugin_custom_field_height").value = 0;
+            }
+            if (cmLargura > <?php echo $registro->largura_maxima; ?> && inputName == 'largura') {
+                alert.innerHTML = '';
+                alert.innerHTML = '<span style="color:red; font-weight: bold;">ATENÇÃO! O máximo valor permitido para largura é de: <?php echo $registro->largura_maxima; ?> cm</span>'
+                document.getElementById("wp_g_h_w_plugin_custom_field_width").value = 0;
+            }
         }
     </script>
     <?php
@@ -138,8 +154,8 @@ function get_setted_values()
 
     // Verificar se há resultados
     if ($registro) {
-        $campo1 = $registro->largura_maxima;
-        $campo2 = $registro->altura_maxima;
+        $campo1 = $registro->altura_maxima;
+        $campo2 = $registro->largura_maxima;
         $campo3 = $registro->preco_0_05;
         $campo4 = $registro->preco_05_1;
         $campo5 = $registro->preco_1_3;
@@ -397,7 +413,7 @@ function meus_campos_personalizados()
     woocommerce_form_field('altura', array(
         'id' => 'checkout_altura',
         'name' => 'checkout_altura',
-        'type' => 'text',
+        'type' => 'number',
         'class' => array(''),
         'required' => false,
         'placeholder' => __('Insira a altura em centímetros'),
@@ -407,7 +423,7 @@ function meus_campos_personalizados()
     woocommerce_form_field('largura', array(
         'id' => 'checkout_largura',
         'name' => 'checkout_largura',
-        'type' => 'text',
+        'type' => 'number',
         'class' => array(''),
         'required' => false,
         'placeholder' => __('Insira a largura em centímetros'),
@@ -506,9 +522,15 @@ function meus_campos_personalizados()
 
     </script>
     <script type="text/javascript">
-        document.getElementById("checkout_largura").addEventListener("keyup", calcularAreaCheckout);
-        document.getElementById("checkout_altura").addEventListener("keyup", calcularAreaCheckout);
-        function calcularAreaCheckout() {
+        document.getElementById("checkout_largura").addEventListener("keyup", criarCallback("largura"));
+        document.getElementById("checkout_altura").addEventListener("keyup", criarCallback("altura"));
+        // Definindo uma função anônima que recebe um parâmetro e retorna uma função de callback
+        function criarCallback(parametro) {
+            return function (event) {
+                calcularAreaCheckout(parametro);
+            }
+        };
+        function calcularAreaCheckout(inputName) {
             //Vefica o range em m² para definir o preço
             //((pegas os preços antes no banco))
             <?php
@@ -594,18 +616,20 @@ function meus_campos_personalizados()
                     finalAmount.value = (<?php echo $registro->preco_3_5; ?> * areaMetrosQuadrados).toFixed(2);
                     break;
                 default:
-                    newPrice.innerHTML = "O valor é maior que a proporção máxima! Insira outro valor!";
+                    newPrice.innerHTML = "<span style='color:red; font-weight: bold;'>Insira outro valor</span>";
                     break;
             }
 
 
-            if (cmAltura > <?php echo $registro->altura_maxima; ?>) {
+            if (cmAltura > <?php echo $registro->altura_maxima; ?> && inputName == 'altura') {
+                newPrice.innerHTML = '';
                 newPrice.innerHTML = '<span style="color:red; font-weight: bold;">ATENÇÃO! O máximo valor permitido para altura é de: <?php echo $registro->altura_maxima; ?> cm</span>'
-                cmAltura.value = '';
+                document.getElementById("checkout_altura").value = 0;
             }
-            if (cmLargura > <?php echo $registro->largura_maxima; ?>) {
+            if (cmLargura > <?php echo $registro->largura_maxima; ?> && inputName == 'largura') {
+                newPrice.innerHTML = '';
                 newPrice.innerHTML = '<span style="color:red; font-weight: bold;">ATENÇÃO! O máximo valor permitido para largura é de: <?php echo $registro->largura_maxima; ?> cm</span>'
-                cmLargura.value = '';
+                document.getElementById("checkout_largura").value = 0;
             }
 
         }
